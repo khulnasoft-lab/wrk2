@@ -187,6 +187,19 @@
        else 
            io.write("\t\t},\n")
        end
+
+       if p == 99 then
+        for _, p in pairs({ 99.9, 99.99, 99.999 }) do
+            io.write("\t\t{\n")
+            --print(latency.total_count(50))
+            n = latency:percentile(p)
+            -- k = latency:total_count(p)
+            -- io.write(string.format("\t\t\t\"SAKOO\": %s,\n", latency:percentile(p)))
+
+            io.write(string.format("\"Percent\": %g,\n\"Value\": %f\n", p, n*0.001))
+            io.write("\t\t},\n")
+        end
+       end
     end
     io.write("\t]\n}\n")
  end
