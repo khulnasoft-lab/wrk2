@@ -129,16 +129,23 @@
     --  print(string.format("Socket write errors: %d", summary.errors.write))
     -- generate table of URL strings from first thread's endpoints table
     -- (all threads generate the same table in init())
+    -- print(string.format("Summary:"))
+    -- require 'pl.pretty'.dump(summary)
+    -- print(string.format("Latency:"))
+    -- require 'pl.pretty'.dump(getmetatable(latency))
+    -- print(string.format("Requests:"))
+    -- require 'pl.pretty'.dump(getmetatable(requests))
     io.write("{\n")
-    io.write(string.format("\"TotalRequests\": \"%d\",\n", summary.requests))
-    io.write(string.format("\"DurationInMicroseconds\": \"%0.2f\",\n", summary.duration))
-    io.write(string.format("\"Bytes\": \"%d\",\n", summary.bytes))
-    io.write(string.format("\"RequestsPerSec\": \"%0.2f\",\n", (summary.requests/summary.duration)*1e6))
-    io.write(string.format("\"BytesTransferPerSec\": \"%0.2f\",\n", (summary.bytes/summary.duration)*1e6))
-    io.write(string.format("\"MinLatency\": \"%0.2f\",\n", latency.min))
-    io.write(string.format("\"AvgLatency\": \"%0.2f\",\n", latency.mean))
-    io.write(string.format("\"MaxLatency\": \"%0.2f\",\n", latency.max))
-    io.write(string.format("\"StdDev\": \"%0.2f\",\n", latency.stdev))
+    io.write(string.format("\"TotalRequests\": %d,\n", summary.requests))
+    io.write(string.format("\"DurationInMicroseconds\": %0.2f,\n", summary.duration))
+    io.write(string.format("\"Bytes\": %d,\n", summary.bytes))
+    io.write(string.format("\"RequestsPerSec\": %0.2f,\n", (summary.requests/summary.duration)*1e6))
+    io.write(string.format("\"BytesTransferPerSec\": %0.2f,\n", (summary.bytes/summary.duration)*1e6))
+    io.write(string.format("\"Errors\": %0.2f,\n", summary.errors.status))
+    io.write(string.format("\"MinLatency\": %0.2f,\n", latency.min))
+    io.write(string.format("\"AvgLatency\": %0.2f,\n", latency.mean))
+    io.write(string.format("\"MaxLatency\": %0.2f,\n", latency.max))
+    io.write(string.format("\"StdDev\": %0.2f,\n", latency.stdev))
 
     local urls = {}
      local counts = {}
@@ -161,19 +168,20 @@
                               end)
      end
      for i=0, #urls, 1 do
-         print(string.format("\"Url_".. i .."\": \"%s\",\n\"UrlRequestCount_".. i .."\": %d", urls[i], counts[i]))
+         print(string.format("\"Url_".. i .."\": \"%s\",\n\"UrlRequestCount_".. i .."\": %d,", urls[i], counts[i]))
      end
 
 
     io.write("\"Percentiles\": [\n")
-    for _, p in pairs({ 50, 75, 90, 99, 99.9, 99.99, 99.999, 100 }) do
+    -- for _, p in pairs({ 50, 75, 90, 99, 99.9, 99.99, 99.999, 100 }) do
+    for p = 1, 100 do
        io.write("\t\t{\n")
        --print(latency.total_count(50))
        n = latency:percentile(p)
       -- k = latency:total_count(p)
      -- io.write(string.format("\t\t\t\"SAKOO\": %s,\n", latency:percentile(p)))
 
-       io.write(string.format("\"Percent\": \"%g\",\n\"Value\": \"%f\"\n", p, n*0.001))
+       io.write(string.format("\"Percent\": %g,\n\"Value\": %f\n", p, n*0.001))
        if p == 100 then 
            io.write("\t\t}\n")
        else 
